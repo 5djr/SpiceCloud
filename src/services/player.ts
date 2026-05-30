@@ -133,7 +133,9 @@ class SoundCloudPlayer {
     });
     this.audio.addEventListener("pause", () => {
       document.body.classList.remove("sc-playing");
-      this.stopTimer();
+      // Do NOT stop the timer here — the mute loop must keep running while
+      // _track is set so Spotify's audio stays silent even when SC is paused.
+      // stopTimer() is called only when _track is cleared (songchange / destroy).
       this.emit();
     });
     this.audio.addEventListener("play", () => {
@@ -687,6 +689,7 @@ class SoundCloudPlayer {
     this._track = track;
     this._isLoading = true;
     this._error = null;
+    this.startTimer();  // keep Spotify muted during stream-URL resolution
     this.emit();
 
     // Mute Spotify's audio immediately — belt-and-suspenders safety.
